@@ -2,6 +2,7 @@ package th.java.transaction.demo.db.transaction;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 
 import javax.sql.DataSource;
@@ -24,6 +25,48 @@ public class TransactionByNative {
 	String sqlUpdateUser = "update demo_user set user_name = ?, updateDtm = ? where user_id = "
 			+ "(select user_id from demo_user where user_id = ? and updateDtm < ?)";
 	String sqlUpdateAddress = "update demo_address set address_detail = ? where address_id = ?";
+	String select = "select count(*) from demo_user where user_id = ?";
+	
+	public int selectCount(int id) throws Exception {
+		Connection con = null;
+		PreparedStatement preStm = null;
+		ResultSet rs = null;
+		try {
+			Integer result = 0;
+			con = dataSource.getConnection();
+			con.setAutoCommit(true);
+			con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			preStm = con.prepareStatement(select);
+			preStm.setLong(1, id);
+			
+			rs = preStm.executeQuery();
+
+            while (rs.next()) {
+            	result = rs.getInt(1);
+            }
+            
+            return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (null != rs) {
+		        try {
+		            rs.close();
+		        } catch (Exception e) {}
+			}
+			if (null != preStm) {
+				try {
+					preStm.close();
+				} catch (Exception e) {}
+			}
+			if (null != con) {
+				try {
+					con.close();
+				} catch (Exception e) {}
+			}
+		}
+	}
 	
 	public void save(UserEntity userEntity, AddressEntity addressEntity) throws Exception {
 		Connection con = null;

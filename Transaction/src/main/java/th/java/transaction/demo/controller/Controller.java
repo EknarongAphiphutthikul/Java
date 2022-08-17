@@ -23,6 +23,12 @@ public class Controller {
 	@Autowired
 	private TransactionByNative transactionByNative;
 	
+	@PostMapping("native/select") 
+	public @ResponseBody String selectByTransactionByNative(@RequestBody RequestModel request) throws Exception {
+		int count = transactionByNative.selectCount(request.getId());
+		return "OK";
+	}
+	
 	@PostMapping("annotation/insert") 
 	public @ResponseBody String insertByTransactionByAnnotation(@RequestBody RequestModel request) throws Exception {
 		transactionByAnnotation.saveOrUpdate(createUserEntity(request), createAddressEntity(request));
