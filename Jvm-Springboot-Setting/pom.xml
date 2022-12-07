@@ -21,11 +21,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<logback.version>1.2.10</logback.version>
 		
-		<!-- define in project -->
-		<dockerfile-maven-plugin-version>1.4.13</dockerfile-maven-plugin-version>
 		<jupiter-engine-version>5.7.0</jupiter-engine-version>
-		<docker.image.prefix>localhost:2375</docker.image.prefix>
-		<project.repo>example</project.repo>
 	</properties>
 
 	<dependencies>
@@ -204,20 +200,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>dockerfile-maven-plugin</artifactId>
-				<version>${dockerfile-maven-plugin-version}</version>
-				<configuration>
-					<skip>false</skip>
-					<tag>${project.version}</tag>
-					<repository>${docker.image.prefix}/${project.repo}/${project.artifactId}</repository>
-					<buildArgs>
-						<JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
-					</buildArgs>
-					<noCache>true</noCache>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

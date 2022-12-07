@@ -12,7 +12,6 @@ import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import com.example.constants.KafkaConfig;
@@ -21,7 +20,6 @@ import com.example.utils.TxnLogProcessUtil;
 
 @Component("custom-kafka")
 @ConditionalOnProperty(value="management.health.custom-kafka.enabled", matchIfMissing = true)
-@DependsOn("PropertyConfigHelper")
 public class CustomKafkaHealthIndicator extends AbstractHealthIndicator {
 	
 	private boolean up = false;
