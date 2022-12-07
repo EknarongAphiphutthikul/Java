@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false">
+
+	<property name="asyncQueueSize" value="${LOGBACK_ASYNC_QUEUE_SIZE:-500}" />
+	<property name="includeCallerData" value="false" />
+	<property name="discardingThreshold" value="0" />
+	<property name="neverBlock" value="false" />
+	<property name="LOG_PATTERN" value="%m%n" />
+	<property name="LOG_FILE_PATTERN" value="%m%n" />
+	<property name="LOG_ROOT_FILE_PATTERN" value="%d{yyyy-MM-dd'T'HH:mm:ss.SSS'+07:00'}|%level|%m%n" />
+	<property name="kube-namespace" value="${KUBERNETES_NAMESPACE}" />
+	<property name="kube-podname" value="${KUBERNETES_PODNAME}" />
+	<springProperty name="log-path" source="custom.log.file.path"/>
+	<springProperty name="log-file-name" source="custom.log.file.name"/>
+
+	<appender name="ConsoleAppenderRoot" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp/>
+				<pattern>
+					<pattern>
+						{
+						"kube_namespace": "${KUBERNETES_NAMESPACE:--}",
+						"kube_pod_name": "${KUBERNETES_PODNAME:--}",
+						"msg": "%message",
+						"line_number": "%line",
+						"class": "%class",
+						"log_level": "%level",
+						"logger_name": "%logger"
+						}
+					</pattern>
+				</pattern>
+				<stackTrace>
+					<fieldName>error_stacktrace</fieldName>
+				</stackTrace>
+			</providers>
+		</encoder>
+	</appender>
+	
+	<appender name="ConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="LogDebugRoot-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- <file>${log-path}/${kube-namespace}/${kube-podname}/${log-file-name}-Root.log</file> -->
+		<encoder>
+			<pattern>${LOG_ROOT_FILE_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log-path}/${kube-namespace}/%d{yyyy-MM-dd, aux}/${kube-podname}/${log-file-name}-Root-%d{yyyy-MM-dd-HH}.log.gz</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	
+	<appender name="LogDebug-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- <file>${log-path}/${kube-namespace}/${kube-podname}/${log-file-name}.log</file> -->
+		<encoder>
+			<pattern>${LOG_FILE_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log-path}/${kube-namespace}/%d{yyyy-MM-dd, aux}/${kube-podname}/${log-file-name}-%d{yyyy-MM-dd-HH}.log.gz</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	
+	
+	<appender name="LogDebugRoot-FILE-Async" class="ch.qos.logback.classic.AsyncAppender">
+		<queueSize>${asyncQueueSize}</queueSize>
+		<includeCallerData>${includeCallerData}</includeCallerData>
+		<discardingThreshold>${discardingThreshold}</discardingThreshold>
+		<neverBlock>${neverBlock}</neverBlock>
+    	<appender-ref ref="LogDebugRoot-FILE" />
+  	</appender>
+  	<appender name="LogDebug-FILE-Async" class="ch.qos.logback.classic.AsyncAppender">
+  		<queueSize>${asyncQueueSize}</queueSize>
+  		<includeCallerData>${includeCallerData}</includeCallerData>
+		<discardingThreshold>${discardingThreshold}</discardingThreshold>
+		<neverBlock>${neverBlock}</neverBlock>
+    	<appender-ref ref="LogDebug-FILE" />
+  	</appender>
+	
+	<root level="warn">
+		<appender-ref ref="ConsoleAppenderRoot" />
+		<appender-ref ref="LogDebugRoot-FILE-Async" />
+	</root>
+	<logger name="LogDebug" level="info" additivity="false">
+		<appender-ref ref="ConsoleAppender" />
+	</logger>
+	<logger name="LogDebug-File" level="info" additivity="false">
+		<appender-ref ref="LogDebug-FILE-Async" />
+	</logger>
+	<logger name="MetricJson" level="info" additivity="false">
+		<appender-ref ref="ConsoleAppender" />
+	</logger>
+</configuration>
